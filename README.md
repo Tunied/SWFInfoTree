@@ -7,13 +7,13 @@
 
 ##What is include ?
 
-* command-line generate tool  
-	use to read the info from swf file and generate the result file.
+* __command-line generate tool__  
+    use to read the info from swf file and generate the result file.
 
-* structure tree class  
-	those class are use in display tree structure build
+* __structure tree class__  
+    those class are use in display tree structure build
 
-* serialize &  deserialize code  
-	use those code snippet you can conversion structure tree class from byteArray file without lose type info (it also work for other AS3 object too!)
+* __serialize &  deserialize code__  
+    use those code snippet you can conversion structure tree class from byteArray file without lose type info (it also work for other AS3 object too!)
 
 
