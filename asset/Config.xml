@@ -1,5 +1,6 @@
 <root>
 	<file>
+		<fileName>GUI</fileName>
 		<inputFile>GUI.swf</inputFile>
 		<outputFilePath>../output</outputFilePath>
 	</file>

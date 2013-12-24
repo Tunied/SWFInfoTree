@@ -4,6 +4,7 @@ package app.configuration
 
 	public final class ConfigMetaNodeFile
 	{
+		public var fileName:String;
 		public var inputFile:String;
 		public var outputFilePath:String;
 		

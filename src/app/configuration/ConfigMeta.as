@@ -71,6 +71,7 @@ package app.configuration
 				var nodeFileMeta:ConfigMetaNodeFile=new ConfigMetaNodeFile();
 				nodeFileMeta.inputFile=fileNodeElement.inputFile;
 				nodeFileMeta.outputFilePath=fileNodeElement.outputFilePath;
+				nodeFileMeta.fileName=fileNodeElement.fileName;
 				allNodeFileVector.push(nodeFileMeta);
 			}
 
