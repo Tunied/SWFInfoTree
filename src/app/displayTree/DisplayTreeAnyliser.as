@@ -109,6 +109,7 @@ package app.displayTree
 		{
 			var mcMeta:CESMovieClipMeta=new CESMovieClipMeta();
 			mcMeta.mSubFrameArray=[];
+			mcMeta.mKeyAndIndexMapDic={}
 
 			var totalFrame:int=_target.totalFrames;
 
@@ -119,6 +120,8 @@ package app.displayTree
 				_target.gotoAndStop(currentFrame);
 				var rootSpMeta:CESSpriteMeta=getEmptySpriteMeta();
 				mcMeta.mSubFrameArray[currentFrame]=rootSpMeta;
+				//===Push帧标签
+				_target.currentFrameLabel != null ? mcMeta.mKeyAndIndexMapDic[_target.currentFrameLabel]=currentFrame : null;
 
 				//===遍历当前帧下每个Child
 				var totalChildNum:int=_target.numChildren;
@@ -126,8 +129,8 @@ package app.displayTree
 				{
 					var subChild:DisplayObject=_target.getChildAt(index);
 					rootSpMeta.childMetaArray.push(anylise(subChild));
-						//TODO::考虑Mapping的问题
 				}
+					//TODO::考虑Mapping的问题
 
 			}
 			fillMetaBasicInfo(_target, mcMeta);

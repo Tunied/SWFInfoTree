@@ -44,50 +44,6 @@ package app.entry
 			ConfigMeta.instance.initialize(onConfigMetaInitComplate);
 		}
 
-		private function addTargetToStage():void
-		{
-			var nodeFile:ConfigMetaNodeFile=ConfigMeta.instance.allNodeFileVector[0];
-
-			var export_1:MovieClip=new (nodeFile.domain.getDefinition("Export_1") as Class)();
-			var export_2:MovieClip=new (nodeFile.domain.getDefinition("Export_2") as Class)();
-
-			//this.addChild(export_1);
-			//this.addChild(export_2);
-
-			var sp1:Sprite=export_1.getChildAt(0) as Sprite;
-			var sp2:Sprite=export_2.getChildAt(0) as Sprite;
-
-			var shape1:Shape=sp1.getChildAt(0) as Shape;
-			var shape2:Shape=sp2.getChildAt(0) as Shape;
-
-			var re1:Rectangle=shape1.getBounds(shape1);
-			var re2:Rectangle=shape2.getBounds(shape2);
-
-			var warpS1:Sprite=new Sprite();
-			warpS1.addChild(shape1);
-
-			var warpS2:Sprite=new Sprite();
-			warpS2.addChild(shape2);
-
-			var warpRe1:Rectangle=warpS1.getBounds(warpS1);
-			var warpRe2:Rectangle=warpS2.getBounds(warpS2);
-
-
-			this.addChild(warpS1);
-			this.addChild(warpS2);
-
-			//初始化Anyliser 每个文件导出一份纹理
-			displayTreeAnyliser=new DisplayTreeAnyliser();
-			displayTreeAnyliser.initialize();
-
-			var meta1:CESDisplayObjectMeta=displayTreeAnyliser.anylise(export_1);
-			var meta2:CESDisplayObjectMeta=displayTreeAnyliser.anylise(export_2);
-
-			trace(shape1);
-
-		}
-
-
 		private function onConfigMetaInitComplate():void
 		{
 			//初始化Optimizer
