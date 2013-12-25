@@ -1,4 +1,4 @@
-package app.anylise
+package app.displayTree
 {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -15,12 +15,15 @@ package app.anylise
 	import copyengine.ui.starling.component.meta.CESMovieClipMeta;
 	import copyengine.ui.starling.component.meta.CESShapeMeta;
 	import copyengine.ui.starling.component.meta.CESSpriteMeta;
+	import copyengine.ui.starling.component.meta.CESTextureMeta;
+	import copyengine.utils.UUIDFactory;
 
 	public final class DisplayTreeAnyliser
 	{
 		private var allMaskBitmapDataVector:Vector.<BitmapData>;
 		private var allPHBitmapDataVector:Vector.<BitmapData>;
 		private var allTextureDic:Dictionary;
+		private var textureFileName:String;
 
 		public function DisplayTreeAnyliser()
 		{
@@ -32,6 +35,11 @@ package app.anylise
 			allPHBitmapDataVector=new Vector.<BitmapData>();
 			allTextureDic=new Dictionary();
 		}
+
+		/**
+		 * 设置导出纹理信息的文件名称,用于初始化CESTextureMeta数据
+		 */
+		public function setTextrueFileName(_name:String):void  { textureFileName=_name; }
 
 		/**
 		 *在FLA文件中,如果一个导出元件是以 "mask" or "MASK" 开头,则认为该元件为Mask导出类,在遍历显示树期间,
@@ -64,37 +72,6 @@ package app.anylise
 		{
 			allTextureDic[_uniqueKey]=_bitmapData;
 		}
-
-		//=============================================//
-		//================= OPTIMIZE ====================//
-		//=============================================//
-
-		/**
-		 * 对某一个Meta显示树层级结构进行优化</br>
-		 * <b>注意!!!目前版本不支持滤镜</b>
-		 * <li>如果某一个Sprite节点下仅有一个Child,且这个Child为一个Shape,则删除Sprite节点仅保留Shape节点
-		 *
-		 * @return  优化后的Meta数据
-		 *
-		 */
-		public function optimize(_meta:CESDisplayObjectMeta):CESDisplayObjectMeta
-		{
-			return null;
-		}
-
-		/**
-		 *While-True循环,遍历调用该函数,每次调用优化一次及返回
-		 * <li>TRUE		表示当前优化了一次,while循环需要继续
-		 * <li>FALSE		表示当前没有做任何优化,while循环可以结束
-		 */
-		private function doOptimize(_meta:CESDisplayObjectMeta):Boolean
-		{
-			return false;
-		}
-
-
-
-
 
 		//=============================================//
 		//==============      ANYLISE      ====================//
@@ -134,18 +111,25 @@ package app.anylise
 			mcMeta.mSubFrameArray=[];
 
 			var totalFrame:int=_target.totalFrames;
+
+			//MovieClip有一个Bug,只有反向(及从最后一帧开始往前遍历才会正常Cache),如果从
+			//第一帧往后Cache则如果Child为一个Shape仅能取到第一帧的Child
 			for (var currentFrame:int=totalFrame; currentFrame > 0; currentFrame--)
 			{
 				_target.gotoAndStop(currentFrame);
+				var rootSpMeta:CESSpriteMeta=getEmptySpriteMeta();
+				mcMeta.mSubFrameArray[currentFrame]=rootSpMeta;
+
+				//===遍历当前帧下每个Child
 				var totalChildNum:int=_target.numChildren;
-				for (var index:int=totalChildNum; index < totalChildNum; index++)
+				for (var index:int=0; index < totalChildNum; index++)
 				{
 					var subChild:DisplayObject=_target.getChildAt(index);
-					mcMeta.mSubFrameArray.push(anylise(subChild));
+					rootSpMeta.childMetaArray.push(anylise(subChild));
 						//TODO::考虑Mapping的问题
 				}
-			}
 
+			}
 			fillMetaBasicInfo(_target, mcMeta);
 			return mcMeta;
 		}
@@ -171,18 +155,69 @@ package app.anylise
 		{
 			var shapeMeta:CESShapeMeta=new CESShapeMeta();
 			fillMetaBasicInfo(_target, shapeMeta);
+			shapeMeta.textureMeta=getTargetTextureInfo(_target);
 			return shapeMeta;
 		}
 
 		private function fillMetaBasicInfo(_target:DisplayObject, _meta:CESDisplayObjectMeta):void
 		{
-			var re:Rectangle=_target.getBounds(_target);
 			_meta.alpha=_target.alpha;
 			_meta.name=_target.name;
 			_meta.width=_target.width;
 			_meta.height=_target.height;
-			_meta.x=_target is Shape ? re.x : _target.x;
-			_meta.y=_target is Shape ? re.y : _target.y;
+
+			if (_target is Shape)
+			{
+				var warpSp:Sprite=new Sprite();
+				warpSp.addChild(_target);
+				var re:Rectangle=warpSp.getBounds(warpSp);
+				_meta.x=re.x;
+				_meta.y=re.y;
+			}
+			else
+			{
+				_meta.x=_target.x;
+				_meta.y=_target.y;
+			}
+		}
+
+		private function getTargetTextureInfo(_target:DisplayObject):CESTextureMeta
+		{
+			var textrueMeta:CESTextureMeta=new CESTextureMeta();
+			textrueMeta.textrueFileName=textureFileName;
+
+			//====尝试从已有纹理中找出一样的纹理
+			var newImg:BitmapData=ImageUtils.cacheDisplayObjectToBitmapData(_target);
+			for (var key:String in allTextureDic)
+			{
+				var oldImg:BitmapData=allTextureDic[key];
+				if (oldImg.compare(newImg) == 0)
+				{
+					textrueMeta.textureKey=key;
+				}
+			}
+
+			//====如果没有则产生新的Texture
+			if (textrueMeta.textureKey == null)
+			{
+				var newKey:String=UUIDFactory.instance.generateUUID();
+				allTextureDic[newKey]=newImg;
+				textrueMeta.textureKey=newKey;
+			}
+			return textrueMeta;
+		}
+
+		/**
+		 *取得一个空的SpriteMeta的Container. 用于CESMovieClipMeta里面
+		 * 其每帧节点均用一个空的sp节点进行warp
+		 */
+		private function getEmptySpriteMeta():CESSpriteMeta
+		{
+			var rootSpMeta:CESSpriteMeta=new CESSpriteMeta();
+			rootSpMeta.alpha=1;
+			rootSpMeta.x=rootSpMeta.y=rootSpMeta.width=rootSpMeta.height=0;
+			rootSpMeta.childMetaArray=[];
+			return rootSpMeta;
 		}
 
 	}

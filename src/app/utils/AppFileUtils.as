@@ -29,7 +29,8 @@ package app.utils
 			var serializedObj:Object=GeneralUtils.serializeObject(_fileMeta);
 			var fileByteArray:ByteArray=new ByteArray();
 			fileByteArray.writeObject(serializedObj);
-			writeByteArrayToPath(fileByteArray, _configFileNode.outputFilePath);
+			fileByteArray.compress();
+			writeByteArrayToPath(fileByteArray, _configFileNode.outputFilePath + "/" + _configFileNode.fileName + ".ce");
 		}
 
 		/**
@@ -38,7 +39,7 @@ package app.utils
 		public static function exportTextureFile(_allTextureDic:Dictionary, _configFileNode:ConfigMetaNodeFile):void
 		{
 			var textureRectDic:Dictionary=new Dictionary();
-			for each (var textureKey:String in _allTextureDic)
+			for (var textureKey:String in _allTextureDic)
 			{
 				var bitmapData:BitmapData=_allTextureDic[textureKey];
 				textureRectDic[textureKey]=new Rectangle(0, 0, bitmapData.width, bitmapData.height);
@@ -50,10 +51,11 @@ package app.utils
 		private static function doExportTextureXML(_allTextureDic:Dictionary, _textureRectDic:Dictionary, _configFileNode:ConfigMetaNodeFile):void
 		{
 			var xml:XML=<TextureAtlas/>;
+			xml.@imagePath=_configFileNode.fileName + ".png";
 			var childXml:XML;
 			var currentBitmapRect:Rectangle;
 
-			for each (var textureKey:String in _allTextureDic)
+			for (var textureKey:String in _allTextureDic)
 			{
 				currentBitmapRect=_textureRectDic[textureKey];
 
@@ -78,7 +80,7 @@ package app.utils
 
 			var shareRect:Rectangle=new Rectangle();
 			var sharePoint:Point=new Point();
-			for each (var textureKey:String in _allTextureDic)
+			for (var textureKey:String in _allTextureDic)
 			{
 				currentBitmapRect=_textureRectDic[textureKey];
 				currentBitmapData=_allTextureDic[textureKey];
@@ -116,7 +118,7 @@ package app.utils
 		private static function writeStringToPath(_str:String, _path:String):void
 		{
 			var bytes:ByteArray=new ByteArray();
-			bytes.writeUTF(_str);
+			bytes.writeMultiByte(_str, "utf-8");
 			writeByteArrayToPath(bytes, _path);
 		}
 
