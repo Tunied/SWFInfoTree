@@ -15,6 +15,9 @@ package app.utils
 
 		public static function cacheDisplayObjectToBitmapData(_target:DisplayObject, scale:Number=1):BitmapData
 		{
+			var targetNormalScaleX:Number=_target.scaleX;
+			var targetNormalScaleY:Number=_target.scaleY;
+
 			emptyBitmapData.dispose();
 			_target.scaleX=_target.scaleY=scale;
 			var bounds:Rectangle=_target.getBounds(_target);
@@ -33,6 +36,9 @@ package app.utils
 				bitmapData=new BitmapData(Math.ceil(_target.width), Math.ceil(_target.height), true, 0xFFFFFF);
 				bitmapData.draw(_target, new Matrix(_target.scaleX, 0, 0, _target.scaleY, -offsetX, -offsetY));
 			}
+			
+			_target.scaleX=targetNormalScaleX;
+			_target.scaleY=targetNormalScaleY;
 			//var bitmap:Bitmap = new Bitmap(bitmapData);
 			//bitmap.x = offsetX;
 			//bitmap.y = offsetY;

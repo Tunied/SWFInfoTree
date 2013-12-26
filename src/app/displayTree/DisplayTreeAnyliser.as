@@ -12,6 +12,7 @@ package app.displayTree
 	import app.utils.ImageUtils;
 
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
+	import copyengine.ui.starling.component.meta.CESMaskMeta;
 	import copyengine.ui.starling.component.meta.CESMovieClipMeta;
 	import copyengine.ui.starling.component.meta.CESShapeMeta;
 	import copyengine.ui.starling.component.meta.CESSpriteMeta;
@@ -139,22 +140,35 @@ package app.displayTree
 
 		private function doAnyliseSprite(_target:Sprite):CESDisplayObjectMeta
 		{
-			var totalChildNum:int=_target.numChildren;
-
-			var spMeta:CESSpriteMeta=new CESSpriteMeta();
-			spMeta.childMetaArray=[];
-
-			for (var index:int=0; index < totalChildNum; index++)
+			if (isMaskOrPH(_target))
 			{
-				var subChild:DisplayObject=_target.getChildAt(index);
-				spMeta.childMetaArray.push(anylise(subChild));
+				var maskMeta:CESMaskMeta=new CESMaskMeta();
+				maskMeta.name=_target.name;
+				maskMeta.x=_target.x;
+				maskMeta.y=_target.y;
+				maskMeta.width=_target.width;
+				maskMeta.height=_target.height;
+				return maskMeta;
 			}
+			else
+			{
+				var totalChildNum:int=_target.numChildren;
 
-			fillMetaBasicInfo(_target, spMeta);
-			return spMeta;
+				var spMeta:CESSpriteMeta=new CESSpriteMeta();
+				spMeta.childMetaArray=[];
+
+				for (var index:int=0; index < totalChildNum; index++)
+				{
+					var subChild:DisplayObject=_target.getChildAt(index);
+					spMeta.childMetaArray.push(anylise(subChild));
+				}
+
+				fillMetaBasicInfo(_target, spMeta);
+				return spMeta;
+			}
 		}
 
-		private function doAnyliseShape(_target:Shape):CESShapeMeta
+		private function doAnyliseShape(_target:Shape):CESDisplayObjectMeta
 		{
 			var shapeMeta:CESShapeMeta=new CESShapeMeta();
 			fillMetaBasicInfo(_target, shapeMeta);
@@ -222,6 +236,29 @@ package app.displayTree
 			rootSpMeta.childMetaArray=[];
 			return rootSpMeta;
 		}
+
+		private function isMaskOrPH(_mc:DisplayObject):Boolean
+		{
+			var img:BitmapData=ImageUtils.cacheDisplayObjectToBitmapData(_mc);
+			for each (var maskData:BitmapData in allMaskBitmapDataVector)
+			{
+				if (maskData.compare(img) == 0)
+				{
+					return true;
+				}
+			}
+
+			for each (var phData:BitmapData in allPHBitmapDataVector)
+			{
+				if (phData.compare(img) == 0)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 
 	}
 }
