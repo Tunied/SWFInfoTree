@@ -8,10 +8,10 @@ package app.displayTree
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.utils.Dictionary;
-
+	
 	import app.debug.APPLog;
 	import app.utils.ImageUtils;
-
+	
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
 	import copyengine.ui.starling.component.meta.CESMaskMeta;
 	import copyengine.ui.starling.component.meta.CESMovieClipMeta;
@@ -205,6 +205,8 @@ package app.displayTree
 			_meta.name=_target.name;
 			_meta.width=_target.width;
 			_meta.height=_target.height;
+			_meta.scaleX=_target.scaleX;
+			_meta.scaleY=_target.scaleY;
 
 			var re:Rectangle;
 			re=_target.getBounds(_target);

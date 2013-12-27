@@ -139,8 +139,12 @@ package app.displayTree
 					//该子对象和其父对象有一个meta的名字不为instance开头,及未取过名字
 					if (StringUtils.startsWith(spMeta.name, "instance") || StringUtils.startsWith(shapeMeta.name, "instance"))
 					{
-						shapeMeta.x+=_meta.x;
-						shapeMeta.y+=_meta.y;
+						shapeMeta.scaleX*=spMeta.scaleX;
+						shapeMeta.scaleY*=spMeta.scaleY;
+						shapeMeta.x=shapeMeta.x * shapeMeta.scaleX + _meta.x;
+						shapeMeta.y=shapeMeta.y * shapeMeta.scaleY + _meta.y;
+						shapeMeta.width*=shapeMeta.scaleX;
+						shapeMeta.height*=shapeMeta.scaleY;
 						shapeMeta.name=StringUtils.startsWith(spMeta.name, "instance") ? shapeMeta.name : spMeta.name;
 						return shapeMeta;
 					}

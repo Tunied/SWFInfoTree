@@ -7,15 +7,14 @@ package app.entry
 	import flash.events.Event;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
-
+	
 	import app.configuration.ConfigMeta;
 	import app.configuration.ConfigMetaNodeFile;
 	import app.debug.APPLog;
 	import app.displayTree.DisplayTreeBuildManger;
-	import app.displayTree.DisplayTreeOptimizer;
-
+	
 	import copyengine.ui.starling.component.meta.CESMetaFacade;
-
+	
 	import org.as3commons.lang.StringUtils;
 
 	public class SWFInfoTree extends Sprite
