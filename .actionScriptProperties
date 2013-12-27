@@ -54,8 +54,8 @@
     <buildTarget buildTargetName="default" platformId="default">
       <airSettings airCertificatePath="D:/百度云同步盘/云同步/证书/AIR桌面证书密码为1.p12" airTimestamp="true" anePathSet="true" version="1">
         <airExcludes>
-          <pathEntry path="SWFInfoTree.swf"/>
           <pathEntry path="SWFInfoTree-app.xml"/>
+          <pathEntry path="SWFInfoTree.swf"/>
         </airExcludes>
         <anePaths/>
         <newLaunchParams/>

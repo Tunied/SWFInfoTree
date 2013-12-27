@@ -7,23 +7,21 @@ package app.entry
 	import flash.events.Event;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
-	
+
 	import app.configuration.ConfigMeta;
 	import app.configuration.ConfigMetaNodeFile;
 	import app.debug.APPLog;
-	import app.displayTree.DisplayTreeAnyliser;
+	import app.displayTree.DisplayTreeBuildManger;
 	import app.displayTree.DisplayTreeOptimizer;
-	import app.utils.AppFileUtils;
-	
-	import copyengine.ui.starling.component.meta.CESFileMeta;
+
 	import copyengine.ui.starling.component.meta.CESMetaFacade;
-	
+
 	import org.as3commons.lang.StringUtils;
 
 	public class SWFInfoTree extends Sprite
 	{
-		private var displayTreeAnyliser:DisplayTreeAnyliser;
-		private var displayTreeOptimizer:DisplayTreeOptimizer;
+		private var displayTreeBuildManger:DisplayTreeBuildManger;
+
 
 		public function SWFInfoTree()
 		{
@@ -42,9 +40,8 @@ package app.entry
 
 		private function onConfigMetaInitComplate():void
 		{
-			//初始化Optimizer
-			displayTreeOptimizer=new DisplayTreeOptimizer();
-
+			displayTreeBuildManger=new DisplayTreeBuildManger();
+			displayTreeBuildManger.initialize();
 
 			APPLog.log("Tool start...");
 			var allFileNodeMetaVector:Vector.<ConfigMetaNodeFile>=ConfigMeta.instance.allNodeFileVector;
@@ -53,41 +50,23 @@ package app.entry
 				APPLog.log("Start anylise file : " + nodeConfigFile.inputFile);
 				var resultObj:Object=separateMaskPHAndNormalSymbol(nodeConfigFile.domain);
 
-				//初始化Anyliser 每个文件导出一份纹理
-				displayTreeAnyliser=new DisplayTreeAnyliser();
-				displayTreeAnyliser.initialize();
-				displayTreeAnyliser.setTextrueFileName(nodeConfigFile.fileName);
-
 				//=====Push所有的Mask
 				for each (var maskMc:DisplayObject in resultObj["maskMcArray"])
 				{
-					displayTreeAnyliser.setMaskMc(maskMc);
+					displayTreeBuildManger.setMaskMc(maskMc);
 				}
 				//======Push所有的PH
 				for each (var phMc:DisplayObject in resultObj["phMcArray"])
 				{
-					displayTreeAnyliser.setPHMc(maskMc);
+					displayTreeBuildManger.setPHMc(maskMc);
 				}
 				//=======Push所有的BitmapData
 				for each (var bitmapDataKey:String in resultObj["bitmapDataDic"])
 				{
-					displayTreeAnyliser.pushBitmapDataToTextureDic(resultObj["bitmapDataDic"][bitmapDataKey], bitmapDataKey);
+					displayTreeBuildManger.pushBitmapDataToTextureDic(resultObj["bitmapDataDic"][bitmapDataKey], bitmapDataKey);
 				}
 
-				//=======分析每个Mc
-				var fileMeta:CESFileMeta=new CESFileMeta();
-				fileMeta.allSubSymbolDic={};
-				for (var normalMcKey:String in resultObj["normalSymbolDic"])
-				{
-					fileMeta.allSubSymbolDic[normalMcKey]=displayTreeAnyliser.anylise(resultObj["normalSymbolDic"][normalMcKey]);
-				}
-				//========优化显示树节点
-				fileMeta=displayTreeOptimizer.optimize(fileMeta);
-
-				//=======序列化并导出File文件
-				AppFileUtils.exportFileMeta(fileMeta, nodeConfigFile);
-				//=======导出纹理信息
-				AppFileUtils.exportTextureFile(displayTreeAnyliser.getAllTextureDic(), nodeConfigFile);
+				displayTreeBuildManger.anyliseFile(resultObj["normalSymbolDic"], nodeConfigFile);
 
 				APPLog.log("End anylise file");
 			}

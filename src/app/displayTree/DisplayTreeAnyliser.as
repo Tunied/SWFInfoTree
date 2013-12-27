@@ -8,10 +8,10 @@ package app.displayTree
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.utils.Dictionary;
-	
+
 	import app.debug.APPLog;
 	import app.utils.ImageUtils;
-	
+
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
 	import copyengine.ui.starling.component.meta.CESMaskMeta;
 	import copyengine.ui.starling.component.meta.CESMovieClipMeta;
@@ -25,6 +25,7 @@ package app.displayTree
 	{
 		private var allMaskBitmapDataVector:Vector.<BitmapData>;
 		private var allPHBitmapDataVector:Vector.<BitmapData>;
+		private var allShapeMetaWarpVector:Vector.<ShapeMetaWarp>;
 		private var allTextureDic:Dictionary;
 		private var textureFileName:String;
 
@@ -36,6 +37,7 @@ package app.displayTree
 		{
 			allMaskBitmapDataVector=new Vector.<BitmapData>();
 			allPHBitmapDataVector=new Vector.<BitmapData>();
+			allShapeMetaWarpVector=new Vector.<ShapeMetaWarp>();
 			allTextureDic=new Dictionary();
 		}
 
@@ -65,6 +67,12 @@ package app.displayTree
 		 * 清除当前在Anyliser里面存储的所有纹理信息
 		 */
 		public function cleanTextureDic():void  { allTextureDic=new Dictionary(); }
+
+		/**
+		 *返回所有需要调整信息的ShapeWarp
+		 *
+		 */
+		public function getAllShapeMetaWarpVector():Vector.<ShapeMetaWarp>  { return allShapeMetaWarpVector; }
 
 		/**
 		 *将一个Bitmapdata Push到当前的TextureDic里面,因为在FLA文件里面有可能会指定Export一些Img素材
@@ -117,6 +125,8 @@ package app.displayTree
 		{
 			var mcMeta:CESMovieClipMeta=new CESMovieClipMeta();
 			mcMeta.mSubFrameArray=[];
+			//帧标签第0帧无意义
+			mcMeta.mSubFrameArray[0]=new CESDisplayObjectMeta();
 			mcMeta.mKeyAndIndexMapDic={}
 
 			var totalFrame:int=_target.totalFrames;
@@ -196,25 +206,51 @@ package app.displayTree
 			_meta.width=_target.width;
 			_meta.height=_target.height;
 
+			var re:Rectangle;
+			re=_target.getBounds(_target);
+			_meta.x=_target.x;
+			_meta.y=_target.y;
+			_meta.pivotX=re.x;
+			_meta.pivotY=re.y;
+
 			if (_target is Shape)
 			{
-				//对于Shape存在一个Bug:
-				//如果在FLA库中某一个元件A是通过 "直接复制" 的 元件B (FLA库中操作) 则元件A的坐标信息是错误的
-				//可以理解为swf底层针对于这种 "直接复制" 做了某种优化,使得元件A的坐标信息其实反映的是把 元件B进行某种变化能够得到
-				//所以这时候需要将shap重新添加到一个container里面 才可以
-				//注意!!由于改变了显示树结构,所以在递归调用时候需要先去的所有元件在for循环
-				//@see doAnyliseSprite()
-				var warpSp:Sprite=new Sprite();
-				warpSp.addChild(_target);
-				var re:Rectangle=warpSp.getBounds(warpSp);
-				_meta.x=re.x;
-				_meta.y=re.y;
+				var shapeMetaWarp:ShapeMetaWarp=new ShapeMetaWarp();
+				shapeMetaWarp.shapeMeta=_meta as CESShapeMeta;
+				shapeMetaWarp.sourceTarget=_target as Shape;
+				allShapeMetaWarpVector.push(shapeMetaWarp);
 			}
-			else
-			{
-				_meta.x=_target.x;
-				_meta.y=_target.y;
-			}
+
+//			if (_target is Shape)
+//			{
+//				//对于Shape存在一个Bug:
+//				//如果在FLA库中某一个元件A是通过 "直接复制" 的 元件B (FLA库中操作) 则元件A的坐标信息是错误的
+//				//可以理解为swf底层针对于这种 "直接复制" 做了某种优化,使得元件A的坐标信息其实反映的是把 元件B进行某种变化能够得到
+//				//所以这时候需要将shap重新添加到一个container里面 才可以
+//				//注意!!由于改变了显示树结构,所以在递归调用时候需要先去的所有元件在for循环
+//				//@see doAnyliseSprite()
+//
+//				var targetParent:DisplayObjectContainer=_target.parent;
+//				var targetChildIndex:int=_target.parent.getChildIndex(_target);
+//
+//				var warpSp:Sprite=new Sprite();
+//				warpSp.addChild(_target);
+//				re=warpSp.getBounds(warpSp);
+//				_meta.x=re.x;
+//				_meta.y=re.y;
+//				_meta.pivotX=0;
+//				_meta.pivotY=0;
+//
+//				targetParent.addChildAt(_target, targetChildIndex);
+//			}
+//			else
+//			{
+//				re=_target.getBounds(_target);
+//				_meta.x=_target.x;
+//				_meta.y=_target.y;
+//				_meta.pivotX=re.x;
+//				_meta.pivotY=re.y;
+//			}
 		}
 
 		private function getTargetTextureInfo(_target:DisplayObject):CESTextureMeta
@@ -277,7 +313,6 @@ package app.displayTree
 
 			return false;
 		}
-
 
 	}
 }
