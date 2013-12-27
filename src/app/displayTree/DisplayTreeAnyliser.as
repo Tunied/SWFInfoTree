@@ -2,7 +2,6 @@ package app.displayTree
 {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
-	import flash.display.DisplayObjectContainer;
 	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
@@ -192,8 +191,6 @@ package app.displayTree
 
 		private function fillMetaBasicInfo(_target:DisplayObject, _meta:CESDisplayObjectMeta):void
 		{
-			var targetparent:DisplayObjectContainer=_target.parent;
-
 			_meta.alpha=_target.alpha;
 			_meta.name=_target.name;
 			_meta.width=_target.width;
@@ -201,13 +198,17 @@ package app.displayTree
 
 			if (_target is Shape)
 			{
+				//对于Shape存在一个Bug:
+				//如果在FLA库中某一个元件A是通过 "直接复制" 的 元件B (FLA库中操作) 则元件A的坐标信息是错误的
+				//可以理解为swf底层针对于这种 "直接复制" 做了某种优化,使得元件A的坐标信息其实反映的是把 元件B进行某种变化能够得到
+				//所以这时候需要将shap重新添加到一个container里面 才可以
+				//注意!!由于改变了显示树结构,所以在递归调用时候需要先去的所有元件在for循环
+				//@see doAnyliseSprite()
 				var warpSp:Sprite=new Sprite();
 				warpSp.addChild(_target);
 				var re:Rectangle=warpSp.getBounds(warpSp);
 				_meta.x=re.x;
 				_meta.y=re.y;
-
-				targetparent.addChild(_target);
 			}
 			else
 			{
