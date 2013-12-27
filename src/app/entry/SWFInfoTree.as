@@ -124,11 +124,11 @@ package app.entry
 				var MCCLASS:Class=_domain.getDefinition(key) as Class;
 				var mc:Object=new MCCLASS();
 
-				if (StringUtils.startsWithIgnoreCase(key, "mask"))
+				if (StringUtils.startsWithIgnoreCase(key, "mask_"))
 				{
 					returnObj["maskMcArray"].push(mc);
 				}
-				else if (StringUtils.startsWithIgnoreCase(key, "ph"))
+				else if (StringUtils.startsWithIgnoreCase(key, "ph_"))
 				{
 					returnObj["phMcArray"].push(mc);
 				}

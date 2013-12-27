@@ -2,20 +2,23 @@ package app.displayTree
 {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.geom.Rectangle;
+	import flash.text.TextField;
 	import flash.utils.Dictionary;
-
+	
 	import app.debug.APPLog;
 	import app.utils.ImageUtils;
-
+	
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
 	import copyengine.ui.starling.component.meta.CESMaskMeta;
 	import copyengine.ui.starling.component.meta.CESMovieClipMeta;
 	import copyengine.ui.starling.component.meta.CESShapeMeta;
 	import copyengine.ui.starling.component.meta.CESSpriteMeta;
+	import copyengine.ui.starling.component.meta.CESTextFieldMeta;
 	import copyengine.ui.starling.component.meta.CESTextureMeta;
 	import copyengine.utils.UUIDFactory;
 
@@ -99,6 +102,11 @@ package app.displayTree
 			{
 				return doAnyliseShape(_target as Shape);
 			}
+			else if (_target is TextField)
+			{
+				//TODO::暂时不解析
+				return new CESTextFieldMeta();
+			}
 			else
 			{
 				APPLog.err("unknow target type");
@@ -178,6 +186,8 @@ package app.displayTree
 
 		private function fillMetaBasicInfo(_target:DisplayObject, _meta:CESDisplayObjectMeta):void
 		{
+			var targetparent:DisplayObjectContainer=_target.parent;
+			
 			_meta.alpha=_target.alpha;
 			_meta.name=_target.name;
 			_meta.width=_target.width;
@@ -190,6 +200,8 @@ package app.displayTree
 				var re:Rectangle=warpSp.getBounds(warpSp);
 				_meta.x=re.x;
 				_meta.y=re.y;
+				
+				targetparent.addChild(_target);
 			}
 			else
 			{
