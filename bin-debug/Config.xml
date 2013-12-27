@@ -1,9 +1,9 @@
 <root>
-	<!--  <file>
+	<!-- <file>
 		<fileName>GUI</fileName>
 		<inputFile>File:///C:/WorkGround/AS3/TestCESUIComponent/assets/source/GUI.swf</inputFile>
 		<outputFilePath>File:///C:/WorkGround/AS3/TestCESUIComponent/assets/textures/1x</outputFilePath>
-	</file>-->
+	</file> -->
 	<file>
 		<fileName>GUI2</fileName>
 		<inputFile>File:///D:/Test/GUI2.swf</inputFile>

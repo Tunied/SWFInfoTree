@@ -3,11 +3,8 @@ package app.entry
 	import flash.desktop.NativeApplication;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
-	import flash.display.MovieClip;
-	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
-	import flash.geom.Rectangle;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
 	
@@ -18,7 +15,6 @@ package app.entry
 	import app.displayTree.DisplayTreeOptimizer;
 	import app.utils.AppFileUtils;
 	
-	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
 	import copyengine.ui.starling.component.meta.CESFileMeta;
 	import copyengine.ui.starling.component.meta.CESMetaFacade;
 	

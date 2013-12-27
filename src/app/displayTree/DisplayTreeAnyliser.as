@@ -139,7 +139,6 @@ package app.displayTree
 					var subChild:DisplayObject=_target.getChildAt(index);
 					rootSpMeta.childMetaArray.push(anylise(subChild));
 				}
-					//TODO::考虑Mapping的问题
 
 			}
 			fillMetaBasicInfo(_target, mcMeta);
@@ -165,10 +164,17 @@ package app.displayTree
 				var spMeta:CESSpriteMeta=new CESSpriteMeta();
 				spMeta.childMetaArray=[];
 
+				//临时缓存所有的子节点,因为在递归遍历时候遇到Shape需要先将Shape
+				//add到另外一个空的sprite上面才能正确的得到相应信息,这样话会打乱显示树结构
+				//无法通过_target.getChildAt(index) 正确取得节点
+				var allChildMcVector:Vector.<DisplayObject>=new Vector.<DisplayObject>();
 				for (var index:int=0; index < totalChildNum; index++)
 				{
-					var subChild:DisplayObject=_target.getChildAt(index);
-					spMeta.childMetaArray.push(anylise(subChild));
+					allChildMcVector.push(_target.getChildAt(index));
+				}
+				for each (var childMc:DisplayObject in allChildMcVector)
+				{
+					spMeta.childMetaArray.push(anylise(childMc));
 				}
 
 				fillMetaBasicInfo(_target, spMeta);
@@ -187,7 +193,7 @@ package app.displayTree
 		private function fillMetaBasicInfo(_target:DisplayObject, _meta:CESDisplayObjectMeta):void
 		{
 			var targetparent:DisplayObjectContainer=_target.parent;
-			
+
 			_meta.alpha=_target.alpha;
 			_meta.name=_target.name;
 			_meta.width=_target.width;
@@ -200,7 +206,7 @@ package app.displayTree
 				var re:Rectangle=warpSp.getBounds(warpSp);
 				_meta.x=re.x;
 				_meta.y=re.y;
-				
+
 				targetparent.addChild(_target);
 			}
 			else
