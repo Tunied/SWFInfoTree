@@ -1,15 +1,15 @@
-package app.displayTree
+package app.displayTree.anyliser
 {
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.display.Shape;
 	import flash.display.Sprite;
-	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.utils.Dictionary;
 	
 	import app.debug.APPLog;
+	import app.displayTree.fixer.ShapeMetaWarp;
 	import app.utils.ImageUtils;
 	
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
@@ -18,8 +18,6 @@ package app.displayTree
 	import copyengine.ui.starling.component.meta.CESShapeMeta;
 	import copyengine.ui.starling.component.meta.CESSpriteMeta;
 	import copyengine.ui.starling.component.meta.CESTextFieldMeta;
-	import copyengine.ui.starling.component.meta.CESTextureMeta;
-	import copyengine.utils.UUIDFactory;
 
 	public final class DisplayTreeAnyliser
 	{
@@ -29,22 +27,22 @@ package app.displayTree
 		private var allTextureDic:Dictionary;
 		private var textureFileName:String;
 
-		public function DisplayTreeAnyliser()
-		{
-		}
+		private var support:DisplayTreeAnyliserSupport;
 
-		public function initialize():void
+		public function DisplayTreeAnyliser()
 		{
 			allMaskBitmapDataVector=new Vector.<BitmapData>();
 			allPHBitmapDataVector=new Vector.<BitmapData>();
 			allShapeMetaWarpVector=new Vector.<ShapeMetaWarp>();
 			allTextureDic=new Dictionary();
+
+			support=new DisplayTreeAnyliserSupport(allMaskBitmapDataVector, allPHBitmapDataVector, allShapeMetaWarpVector, allTextureDic);
 		}
 
 		/**
 		 * 设置导出纹理信息的文件名称,用于初始化CESTextureMeta数据
 		 */
-		public function setTextrueFileName(_name:String):void  { textureFileName=_name; }
+		public function setTextrueFileName(_name:String):void  { textureFileName=_name; support.setTextrueFileName(_name); }
 
 		/**
 		 *在FLA文件中,如果一个导出元件是以 "mask" or "MASK" 开头,则认为该元件为Mask导出类,在遍历显示树期间,
@@ -136,8 +134,10 @@ package app.displayTree
 			for (var currentFrame:int=totalFrame; currentFrame > 0; currentFrame--)
 			{
 				_target.gotoAndStop(currentFrame);
-				var rootSpMeta:CESSpriteMeta=getEmptySpriteMeta();
+				
+				var rootSpMeta:CESSpriteMeta=support.getEmptySpriteMeta();
 				mcMeta.mSubFrameArray[currentFrame]=rootSpMeta;
+				
 				//===Push帧标签
 				_target.currentFrameLabel != null ? mcMeta.mKeyAndIndexMapDic[_target.currentFrameLabel]=currentFrame : null;
 
@@ -150,43 +150,30 @@ package app.displayTree
 				}
 
 			}
-			fillMetaBasicInfo(_target, mcMeta);
+			support.fillMetaBasicInfo(_target, mcMeta);
 			return mcMeta;
 		}
 
 		private function doAnyliseSprite(_target:Sprite):CESDisplayObjectMeta
 		{
-			if (isMaskOrPH(_target))
+			if (support.isMaskOrPH(_target))
 			{
 				var maskMeta:CESMaskMeta=new CESMaskMeta();
-				maskMeta.name=_target.name;
-				maskMeta.x=_target.x;
-				maskMeta.y=_target.y;
-				maskMeta.width=_target.width;
-				maskMeta.height=_target.height;
+				support.fillMaskMetaInfo(_target, maskMeta);
 				return maskMeta;
 			}
 			else
 			{
-				var totalChildNum:int=_target.numChildren;
-
 				var spMeta:CESSpriteMeta=new CESSpriteMeta();
 				spMeta.childMetaArray=[];
 
-				//临时缓存所有的子节点,因为在递归遍历时候遇到Shape需要先将Shape
-				//add到另外一个空的sprite上面才能正确的得到相应信息,这样话会打乱显示树结构
-				//无法通过_target.getChildAt(index) 正确取得节点
-				var allChildMcVector:Vector.<DisplayObject>=new Vector.<DisplayObject>();
+				var totalChildNum:int=_target.numChildren;
 				for (var index:int=0; index < totalChildNum; index++)
 				{
-					allChildMcVector.push(_target.getChildAt(index));
-				}
-				for each (var childMc:DisplayObject in allChildMcVector)
-				{
-					spMeta.childMetaArray.push(anylise(childMc));
+					spMeta.childMetaArray.push(anylise(_target.getChildAt(index)));
 				}
 
-				fillMetaBasicInfo(_target, spMeta);
+				support.fillMetaBasicInfo(_target, spMeta);
 				return spMeta;
 			}
 		}
@@ -194,126 +181,9 @@ package app.displayTree
 		private function doAnyliseShape(_target:Shape):CESDisplayObjectMeta
 		{
 			var shapeMeta:CESShapeMeta=new CESShapeMeta();
-			fillMetaBasicInfo(_target, shapeMeta);
-			shapeMeta.textureMeta=getTargetTextureInfo(_target);
+			support.fillMetaBasicInfo(_target, shapeMeta);
+			shapeMeta.textureMeta=support.getTargetTextureInfo(_target);
 			return shapeMeta;
-		}
-
-		private function fillMetaBasicInfo(_target:DisplayObject, _meta:CESDisplayObjectMeta):void
-		{
-			_meta.alpha=_target.alpha;
-			_meta.name=_target.name;
-			_meta.width=_target.width;
-			_meta.height=_target.height;
-			_meta.scaleX=_target.scaleX;
-			_meta.scaleY=_target.scaleY;
-
-			var re:Rectangle;
-			re=_target.getBounds(_target);
-			_meta.x=_target.x;
-			_meta.y=_target.y;
-			_meta.pivotX=re.x;
-			_meta.pivotY=re.y;
-
-			if (_target is Shape)
-			{
-				var shapeMetaWarp:ShapeMetaWarp=new ShapeMetaWarp();
-				shapeMetaWarp.shapeMeta=_meta as CESShapeMeta;
-				shapeMetaWarp.sourceTarget=_target as Shape;
-				allShapeMetaWarpVector.push(shapeMetaWarp);
-			}
-
-//			if (_target is Shape)
-//			{
-//				//对于Shape存在一个Bug:
-//				//如果在FLA库中某一个元件A是通过 "直接复制" 的 元件B (FLA库中操作) 则元件A的坐标信息是错误的
-//				//可以理解为swf底层针对于这种 "直接复制" 做了某种优化,使得元件A的坐标信息其实反映的是把 元件B进行某种变化能够得到
-//				//所以这时候需要将shap重新添加到一个container里面 才可以
-//				//注意!!由于改变了显示树结构,所以在递归调用时候需要先去的所有元件在for循环
-//				//@see doAnyliseSprite()
-//
-//				var targetParent:DisplayObjectContainer=_target.parent;
-//				var targetChildIndex:int=_target.parent.getChildIndex(_target);
-//
-//				var warpSp:Sprite=new Sprite();
-//				warpSp.addChild(_target);
-//				re=warpSp.getBounds(warpSp);
-//				_meta.x=re.x;
-//				_meta.y=re.y;
-//				_meta.pivotX=0;
-//				_meta.pivotY=0;
-//
-//				targetParent.addChildAt(_target, targetChildIndex);
-//			}
-//			else
-//			{
-//				re=_target.getBounds(_target);
-//				_meta.x=_target.x;
-//				_meta.y=_target.y;
-//				_meta.pivotX=re.x;
-//				_meta.pivotY=re.y;
-//			}
-		}
-
-		private function getTargetTextureInfo(_target:DisplayObject):CESTextureMeta
-		{
-			var textrueMeta:CESTextureMeta=new CESTextureMeta();
-			textrueMeta.textrueFileName=textureFileName;
-
-			//====尝试从已有纹理中找出一样的纹理
-			var newImg:BitmapData=ImageUtils.cacheDisplayObjectToBitmapData(_target);
-			for (var key:String in allTextureDic)
-			{
-				var oldImg:BitmapData=allTextureDic[key];
-				if (oldImg.compare(newImg) == 0)
-				{
-					textrueMeta.textureKey=key;
-				}
-			}
-
-			//====如果没有则产生新的Texture
-			if (textrueMeta.textureKey == null)
-			{
-				var newKey:String=UUIDFactory.instance.generateUUID();
-				allTextureDic[newKey]=newImg;
-				textrueMeta.textureKey=newKey;
-			}
-			return textrueMeta;
-		}
-
-		/**
-		 *取得一个空的SpriteMeta的Container. 用于CESMovieClipMeta里面
-		 * 其每帧节点均用一个空的sp节点进行warp
-		 */
-		private function getEmptySpriteMeta():CESSpriteMeta
-		{
-			var rootSpMeta:CESSpriteMeta=new CESSpriteMeta();
-			rootSpMeta.alpha=1;
-			rootSpMeta.x=rootSpMeta.y=rootSpMeta.width=rootSpMeta.height=0;
-			rootSpMeta.childMetaArray=[];
-			return rootSpMeta;
-		}
-
-		private function isMaskOrPH(_mc:DisplayObject):Boolean
-		{
-			var img:BitmapData=ImageUtils.cacheDisplayObjectToBitmapData(_mc);
-			for each (var maskData:BitmapData in allMaskBitmapDataVector)
-			{
-				if (maskData.compare(img) == 0)
-				{
-					return true;
-				}
-			}
-
-			for each (var phData:BitmapData in allPHBitmapDataVector)
-			{
-				if (phData.compare(img) == 0)
-				{
-					return true;
-				}
-			}
-
-			return false;
 		}
 
 	}

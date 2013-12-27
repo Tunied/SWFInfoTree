@@ -1,4 +1,4 @@
-package app.displayTree
+package app.displayTree.optimizer
 {
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
 	import copyengine.ui.starling.component.meta.CESFileMeta;

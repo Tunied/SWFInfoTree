@@ -8,6 +8,9 @@ package app.displayTree
 	import app.utils.AppFileUtils;
 
 	import copyengine.ui.starling.component.meta.CESFileMeta;
+	import app.displayTree.anyliser.DisplayTreeAnyliser;
+	import app.displayTree.optimizer.DisplayTreeOptimizer;
+	import app.displayTree.fixer.DisplayTreeShapeFixer;
 
 	public final class DisplayTreeBuildManger
 	{
@@ -22,7 +25,6 @@ package app.displayTree
 		public function initialize():void
 		{
 			anylister=new DisplayTreeAnyliser();
-			anylister.initialize();
 			optimizer=new DisplayTreeOptimizer();
 			shapeFixer=new DisplayTreeShapeFixer();
 		}

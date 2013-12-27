@@ -4,14 +4,13 @@ package app.configuration
 	import flash.display.LoaderInfo;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-
+	
 	import app.debug.APPLog;
-
+	
 	import copyengine.utils.GeneralUtils;
 
 	public final class ConfigMeta
