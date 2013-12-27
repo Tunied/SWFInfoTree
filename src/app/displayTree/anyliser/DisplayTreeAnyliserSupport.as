@@ -117,8 +117,8 @@ package app.displayTree.anyliser
 		public function getEmptySpriteMeta():CESSpriteMeta
 		{
 			var rootSpMeta:CESSpriteMeta=new CESSpriteMeta();
-			rootSpMeta.alpha=1;
-			rootSpMeta.x=rootSpMeta.y=rootSpMeta.width=rootSpMeta.height=0;
+			rootSpMeta.scaleX=rootSpMeta.scaleY=rootSpMeta.alpha=1;
+			rootSpMeta.x=rootSpMeta.y=rootSpMeta.pivotX=rootSpMeta.pivotY=0
 			rootSpMeta.childMetaArray=[];
 			return rootSpMeta;
 		}
