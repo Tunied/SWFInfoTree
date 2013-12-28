@@ -7,14 +7,14 @@ package app.entry
 	import flash.events.Event;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
-	
+
 	import app.configuration.ConfigMeta;
 	import app.configuration.ConfigMetaNodeFile;
 	import app.debug.APPLog;
 	import app.displayTree.DisplayTreeBuildManger;
-	
+
 	import copyengine.ui.starling.component.meta.CESMetaFacade;
-	
+
 	import org.as3commons.lang.StringUtils;
 
 	public class SWFInfoTree extends Sprite
@@ -50,17 +50,17 @@ package app.entry
 				var resultObj:Object=separateMaskPHAndNormalSymbol(nodeConfigFile.domain);
 
 				//=====Push所有的Mask
-				for each (var maskMc:DisplayObject in resultObj["maskMcArray"])
+				for each (var reMc:DisplayObject in resultObj["rectangleMcArray"])
 				{
-					displayTreeBuildManger.setMaskMc(maskMc);
+					displayTreeBuildManger.setMaskMc(reMc);
 				}
 				//======Push所有的PH
 				for each (var phMc:DisplayObject in resultObj["phMcArray"])
 				{
-					displayTreeBuildManger.setPHMc(maskMc);
+					displayTreeBuildManger.setPHMc(phMc);
 				}
 				//=======Push所有的BitmapData
-				for each (var bitmapDataKey:String in resultObj["bitmapDataDic"])
+				for (var bitmapDataKey:String in resultObj["bitmapDataDic"])
 				{
 					displayTreeBuildManger.pushBitmapDataToTextureDic(resultObj["bitmapDataDic"][bitmapDataKey], bitmapDataKey);
 				}
@@ -78,7 +78,7 @@ package app.entry
 		 *区分开当前Domain下的导出元件类型</br>
 		 *
 		 * @param _domain
-		 * @return obj["maskMcArray"]	所有MaskMc
+		 * @return obj["rectangleMcArray"]	所有MaskMc
 		 * 				  obj["phMcArray"] 所有PlaceHolderMc
 		 * 				  obj["normalSymbolDic"] 所有普通Mc
 		 * 				  obj["bitmapDataArray"]	所有
@@ -87,7 +87,7 @@ package app.entry
 		private function separateMaskPHAndNormalSymbol(_domain:ApplicationDomain):Object
 		{
 			var returnObj:Object={};
-			returnObj["maskMcArray"]=[];
+			returnObj["rectangleMcArray"]=[];
 			returnObj["phMcArray"]=[];
 			returnObj["normalSymbolDic"]=new Dictionary();
 			returnObj["bitmapDataDic"]=new Dictionary();
@@ -98,11 +98,11 @@ package app.entry
 				var MCCLASS:Class=_domain.getDefinition(key) as Class;
 				var mc:Object=new MCCLASS();
 
-				if (StringUtils.startsWithIgnoreCase(key, "mask_"))
+				if (StringUtils.startsWithIgnoreCase(key, "RE_") || StringUtils.startsWithIgnoreCase(key, "MASK_"))
 				{
-					returnObj["maskMcArray"].push(mc);
+					returnObj["rectangleMcArray"].push(mc);
 				}
-				else if (StringUtils.startsWithIgnoreCase(key, "ph_"))
+				else if (StringUtils.startsWithIgnoreCase(key, "PH_"))
 				{
 					returnObj["phMcArray"].push(mc);
 				}

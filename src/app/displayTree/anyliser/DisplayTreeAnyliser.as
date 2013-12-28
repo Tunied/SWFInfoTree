@@ -7,21 +7,22 @@ package app.displayTree.anyliser
 	import flash.display.Sprite;
 	import flash.text.TextField;
 	import flash.utils.Dictionary;
-	
+
 	import app.debug.APPLog;
 	import app.displayTree.fixer.ShapeMetaWarp;
 	import app.utils.ImageUtils;
-	
+
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
-	import copyengine.ui.starling.component.meta.CESMaskMeta;
 	import copyengine.ui.starling.component.meta.CESMovieClipMeta;
+	import copyengine.ui.starling.component.meta.CESPlaceHolderMeta;
+	import copyengine.ui.starling.component.meta.CESRectangleMeta;
 	import copyengine.ui.starling.component.meta.CESShapeMeta;
 	import copyengine.ui.starling.component.meta.CESSpriteMeta;
 	import copyengine.ui.starling.component.meta.CESTextFieldMeta;
 
 	public final class DisplayTreeAnyliser
 	{
-		private var allMaskBitmapDataVector:Vector.<BitmapData>;
+		private var allRectangleBitmapDataVector:Vector.<BitmapData>;
 		private var allPHBitmapDataVector:Vector.<BitmapData>;
 		private var allShapeMetaWarpVector:Vector.<ShapeMetaWarp>;
 		private var allTextureDic:Dictionary;
@@ -31,12 +32,12 @@ package app.displayTree.anyliser
 
 		public function DisplayTreeAnyliser()
 		{
-			allMaskBitmapDataVector=new Vector.<BitmapData>();
+			allRectangleBitmapDataVector=new Vector.<BitmapData>();
 			allPHBitmapDataVector=new Vector.<BitmapData>();
 			allShapeMetaWarpVector=new Vector.<ShapeMetaWarp>();
 			allTextureDic=new Dictionary();
 
-			support=new DisplayTreeAnyliserSupport(allMaskBitmapDataVector, allPHBitmapDataVector, allShapeMetaWarpVector, allTextureDic);
+			support=new DisplayTreeAnyliserSupport(allRectangleBitmapDataVector, allPHBitmapDataVector, allShapeMetaWarpVector, allTextureDic);
 		}
 
 		/**
@@ -48,7 +49,7 @@ package app.displayTree.anyliser
 		 *在FLA文件中,如果一个导出元件是以 "mask" or "MASK" 开头,则认为该元件为Mask导出类,在遍历显示树期间,
 		 * 如果认定某一个元件为mask,则仅仅读取其相关信息,不再push到显示列表中进行还原
 		 */
-		public function setMaskMc(_mc:DisplayObject):void  { allMaskBitmapDataVector.push(ImageUtils.cacheDisplayObjectToBitmapData(_mc)); }
+		public function setRectangleMc(_mc:DisplayObject):void  { allRectangleBitmapDataVector.push(ImageUtils.cacheDisplayObjectToBitmapData(_mc)); }
 
 		/**
 		 *在FLA文件中,如果一个导出元件是以 "ph" or "PH" 开头,则认为该元件为PlaceHolder导出类,在遍历显示树期间,
@@ -109,8 +110,7 @@ package app.displayTree.anyliser
 			}
 			else if (_target is TextField)
 			{
-				//TODO::暂时不解析
-				return new CESTextFieldMeta();
+				return doAnyliseTextfield(_target as TextField);
 			}
 			else
 			{
@@ -134,10 +134,10 @@ package app.displayTree.anyliser
 			for (var currentFrame:int=totalFrame; currentFrame > 0; currentFrame--)
 			{
 				_target.gotoAndStop(currentFrame);
-				
+
 				var rootSpMeta:CESSpriteMeta=support.getEmptySpriteMeta();
 				mcMeta.mSubFrameArray[currentFrame]=rootSpMeta;
-				
+
 				//===Push帧标签
 				_target.currentFrameLabel != null ? mcMeta.mKeyAndIndexMapDic[_target.currentFrameLabel]=currentFrame : null;
 
@@ -156,11 +156,17 @@ package app.displayTree.anyliser
 
 		private function doAnyliseSprite(_target:Sprite):CESDisplayObjectMeta
 		{
-			if (support.isMaskOrPH(_target))
+			if (support.isRectangleHolder(_target))
 			{
-				var maskMeta:CESMaskMeta=new CESMaskMeta();
-				support.fillMaskMetaInfo(_target, maskMeta);
-				return maskMeta;
+				var reMeta:CESRectangleMeta=new CESRectangleMeta();
+				support.fillRectangleOrPhInfo(_target, reMeta);
+				return reMeta;
+			}
+			else if (support.isPlaceHolder(_target))
+			{
+				var phMeta:CESPlaceHolderMeta=new CESPlaceHolderMeta();
+				support.fillRectangleOrPhInfo(_target, phMeta);
+				return phMeta;
 			}
 			else
 			{
@@ -184,6 +190,13 @@ package app.displayTree.anyliser
 			support.fillMetaBasicInfo(_target, shapeMeta);
 			shapeMeta.textureMeta=support.getTargetTextureInfo(_target);
 			return shapeMeta;
+		}
+
+		private function doAnyliseTextfield(_target:TextField):CESDisplayObjectMeta
+		{
+			var textFieldMeta:CESTextFieldMeta=new CESTextFieldMeta();
+			support.fillTextfieldInfo(_target, textFieldMeta);
+			return textFieldMeta;
 		}
 
 	}

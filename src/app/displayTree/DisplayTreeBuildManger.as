@@ -29,7 +29,7 @@ package app.displayTree
 			shapeFixer=new DisplayTreeShapeFixer();
 		}
 
-		public function setMaskMc(_maskMc:DisplayObject):void  { anylister.setMaskMc(_maskMc); }
+		public function setMaskMc(_maskMc:DisplayObject):void  { anylister.setRectangleMc(_maskMc); }
 
 		public function setPHMc(_phMc:DisplayObject):void  { anylister.setPHMc(_phMc); }
 
