@@ -7,10 +7,10 @@ package app.displayTree.anyliser
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.utils.Dictionary;
-	
+
 	import app.displayTree.fixer.ShapeMetaWarp;
 	import app.utils.ImageUtils;
-	
+
 	import copyengine.ui.starling.component.meta.CESDisplayObjectMeta;
 	import copyengine.ui.starling.component.meta.CESShapeMeta;
 	import copyengine.ui.starling.component.meta.CESSpriteMeta;
@@ -93,7 +93,7 @@ package app.displayTree.anyliser
 
 		public function fillTextfieldInfo(_target:TextField, _textfieldMeta:CESTextFieldMeta):void
 		{
-			var textFormat:TextFormat=_target.getTextFormat();
+			var textFormat:TextFormat=_target.defaultTextFormat;
 			fillMetaBasicInfo(_target, _textfieldMeta);
 
 			_textfieldMeta.align=textFormat.align;
@@ -102,7 +102,7 @@ package app.displayTree.anyliser
 			_textfieldMeta.font=textFormat.font;
 			_textfieldMeta.size=textFormat.size == null ? 12 : textFormat.size as int;
 			_textfieldMeta.text=_target.text;
-			_textfieldMeta.textColor=_target.textColor;
+			_textfieldMeta.textColor=textFormat.color == null ? 0x000000 : textFormat.color as uint;
 			_textfieldMeta.type=_target.type;
 			_textfieldMeta.wordWrap=_target.wordWrap;
 		}
