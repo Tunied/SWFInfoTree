@@ -46,6 +46,8 @@ package app.displayTree.anyliser
 		 */
 		public function setTextrueFileName(_name:String):void  { textureFileName=_name; }
 
+		public function setTextureDic(_newDic:Dictionary):void  { allTextureDic=_newDic; }
+
 		public function fillMetaBasicInfo(_target:DisplayObject, _meta:CESDisplayObjectMeta):void
 		{
 			var re:Rectangle=_target.getBounds(_target);

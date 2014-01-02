@@ -4,15 +4,16 @@ package app.configuration
 
 	public final class ConfigMetaNodeFile
 	{
+		public var isShareTexture:Boolean;
 		public var fileName:String;
 		public var inputFile:String;
 		public var outputFilePath:String;
-		
+
 		/**
-		 *读入文件的ApplicationDomain 
-		 */		
+		 *读入文件的ApplicationDomain
+		 */
 		public var domain:ApplicationDomain;
-		
+
 		public function ConfigMetaNodeFile()
 		{
 		}

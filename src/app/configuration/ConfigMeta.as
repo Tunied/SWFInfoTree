@@ -8,9 +8,9 @@ package app.configuration
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	
+
 	import app.debug.APPLog;
-	
+
 	import copyengine.utils.GeneralUtils;
 
 	public final class ConfigMeta
@@ -71,6 +71,7 @@ package app.configuration
 				nodeFileMeta.inputFile=fileNodeElement.inputFile;
 				nodeFileMeta.outputFilePath=fileNodeElement.outputFilePath;
 				nodeFileMeta.fileName=fileNodeElement.fileName;
+				nodeFileMeta.isShareTexture=fileNodeElement.isShareTexture == "true" ? true : false;
 				allNodeFileVector.push(nodeFileMeta);
 			}
 

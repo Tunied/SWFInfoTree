@@ -1,5 +1,6 @@
 <root>
 	<file>
+		<isShareTexture>true</isShareTexture>
 		<fileName>GUI</fileName>
 		<inputFile>File:///C:/WorkGround/AS3/TestCESUIComponent/assets/source/GUI.swf</inputFile>
 		<outputFilePath>File:///C:/WorkGround/AS3/TestCESUIComponent/assets/textures/1x</outputFilePath>

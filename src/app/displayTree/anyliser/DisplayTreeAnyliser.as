@@ -45,6 +45,8 @@ package app.displayTree.anyliser
 		 */
 		public function setTextrueFileName(_name:String):void  { textureFileName=_name; support.setTextrueFileName(_name); }
 
+		public function getTextrueFileName():String  { return textureFileName; }
+
 		/**
 		 *在FLA文件中,如果一个导出元件是以 "mask" or "MASK" 开头,则认为该元件为Mask导出类,在遍历显示树期间,
 		 * 如果认定某一个元件为mask,则仅仅读取其相关信息,不再push到显示列表中进行还原
@@ -65,23 +67,13 @@ package app.displayTree.anyliser
 		/**
 		 * 清除当前在Anyliser里面存储的所有纹理信息
 		 */
-		public function cleanTextureDic():void  { allTextureDic=new Dictionary(); }
+		public function cleanTextureDic():void  { allTextureDic=new Dictionary(); support.setTextureDic(allTextureDic); }
 
 		/**
 		 *返回所有需要调整信息的ShapeWarp
 		 *
 		 */
 		public function getAllShapeMetaWarpVector():Vector.<ShapeMetaWarp>  { return allShapeMetaWarpVector; }
-
-		/**
-		 *将一个Bitmapdata Push到当前的TextureDic里面,因为在FLA文件里面有可能会指定Export一些Img素材
-		 * 所以在开始anylise之前先将这些bitmapdata push进去</br>
-		 * <b>注意!!! 不要再开始Anylise以后再调用该函数,并且保证传入的key值为uniqueKey</b>
-		 */
-		public function pushBitmapDataToTextureDic(_bitmapData:BitmapData, _uniqueKey:String):void
-		{
-			allTextureDic[_uniqueKey]=_bitmapData;
-		}
 
 		//=============================================//
 		//==============      ANYLISE      ====================//

@@ -4,7 +4,9 @@ package app.entry
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
+	import flash.events.ErrorEvent;
 	import flash.events.Event;
+	import flash.events.UncaughtErrorEvent;
 	import flash.system.ApplicationDomain;
 	import flash.utils.Dictionary;
 
@@ -25,6 +27,7 @@ package app.entry
 		public function SWFInfoTree()
 		{
 			this.addEventListener(Event.ADDED_TO_STAGE, onAddToStage);
+			this.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onGlobalError);
 		}
 
 		private function onAddToStage(e:Event):void
@@ -35,6 +38,14 @@ package app.entry
 			CESMetaFacade.initialize();
 			//初始化Config信息
 			ConfigMeta.instance.initialize(onConfigMetaInitComplate);
+		}
+
+		private function onGlobalError(e:Event):void
+		{
+			APPLog.err(e.toString());
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			e.stopPropagation();
 		}
 
 		private function onConfigMetaInitComplate():void
@@ -62,7 +73,7 @@ package app.entry
 				//=======Push所有的BitmapData
 				for (var bitmapDataKey:String in resultObj["bitmapDataDic"])
 				{
-					displayTreeBuildManger.pushBitmapDataToTextureDic(resultObj["bitmapDataDic"][bitmapDataKey], bitmapDataKey);
+					displayTreeBuildManger.pushExtarBitmapDataToTextureDic(resultObj["bitmapDataDic"][bitmapDataKey], bitmapDataKey);
 				}
 
 				displayTreeBuildManger.anyliseFile(resultObj["normalSymbolDic"], nodeConfigFile);

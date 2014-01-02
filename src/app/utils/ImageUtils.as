@@ -5,6 +5,8 @@ package app.utils
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 
+	import app.debug.APPLog;
+
 	public final class ImageUtils
 	{
 		public function ImageUtils()
@@ -29,6 +31,7 @@ package app.utils
 
 			if (bounds.width == 0 || bounds.height == 0)
 			{
+				APPLog.err("fond one empry bitmap , the symbol in FLA file maybe wrong, please check out!");
 				bitmapData=emptyBitmapData;
 			}
 			else
@@ -36,7 +39,7 @@ package app.utils
 				bitmapData=new BitmapData(Math.ceil(_target.width), Math.ceil(_target.height), true, 0xFFFFFF);
 				bitmapData.draw(_target, new Matrix(_target.scaleX, 0, 0, _target.scaleY, -offsetX, -offsetY));
 			}
-			
+
 			_target.scaleX=targetNormalScaleX;
 			_target.scaleY=targetNormalScaleY;
 			//var bitmap:Bitmap = new Bitmap(bitmapData);

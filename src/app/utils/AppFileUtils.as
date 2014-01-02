@@ -24,34 +24,42 @@ package app.utils
 		/**
 		 * 导出显示树Meta文件
 		 */
-		public static function exportFileMeta(_fileMeta:CESFileMeta, _configFileNode:ConfigMetaNodeFile):void
+		public static function exportFileMeta(_fileMeta:CESFileMeta, _outputFilePath:String, _fileName:String):void
 		{
 			var serializedObj:Object=GeneralUtils.serializeObject(_fileMeta);
 			var fileByteArray:ByteArray=new ByteArray();
 			fileByteArray.writeObject(serializedObj);
 			fileByteArray.compress();
-			writeByteArrayToPath(fileByteArray, _configFileNode.outputFilePath + "/" + _configFileNode.fileName + ".ce");
+			writeByteArrayToPath(fileByteArray, _outputFilePath + "/" + _fileName + ".ce");
 		}
 
 		/**
 		 *导出Starling可以使用的纹理信息,包括一张和fileName相同的png图及xml文件
 		 */
-		public static function exportTextureFile(_allTextureDic:Dictionary, _configFileNode:ConfigMetaNodeFile):void
+		public static function exportTextureFile(_allTextureDic:Dictionary,
+												 _outputFilePath:String,
+												 _fileName:String):void
 		{
-			var textureRectDic:Dictionary=new Dictionary();
-			for (var textureKey:String in _allTextureDic)
+			if (!DictionaryUtils.isEmpty(_allTextureDic))
 			{
-				var bitmapData:BitmapData=_allTextureDic[textureKey];
-				textureRectDic[textureKey]=new Rectangle(0, 0, bitmapData.width, bitmapData.height);
+				var textureRectDic:Dictionary=new Dictionary();
+				for (var textureKey:String in _allTextureDic)
+				{
+					var bitmapData:BitmapData=_allTextureDic[textureKey];
+					textureRectDic[textureKey]=new Rectangle(0, 0, bitmapData.width, bitmapData.height);
+				}
+				doExportTexturePNG(_allTextureDic, textureRectDic, _outputFilePath, _fileName);
+				doExportTextureXML(_allTextureDic, textureRectDic, _outputFilePath, _fileName);
 			}
-			doExportTexturePNG(_allTextureDic, textureRectDic, _configFileNode);
-			doExportTextureXML(_allTextureDic, textureRectDic, _configFileNode);
 		}
 
-		private static function doExportTextureXML(_allTextureDic:Dictionary, _textureRectDic:Dictionary, _configFileNode:ConfigMetaNodeFile):void
+		private static function doExportTextureXML(_allTextureDic:Dictionary,
+												   _textureRectDic:Dictionary,
+												   _outputFilePath:String,
+												   _fileName:String):void
 		{
 			var xml:XML=<TextureAtlas/>;
-			xml.@imagePath=_configFileNode.fileName + ".png";
+			xml.@imagePath=_fileName + ".png";
 			var childXml:XML;
 			var currentBitmapRect:Rectangle;
 
@@ -67,10 +75,13 @@ package app.utils
 				childXml.@height=currentBitmapRect.height;
 				xml.appendChild(childXml);
 			}
-			writeStringToPath(xml.toXMLString(), _configFileNode.outputFilePath + "/" + _configFileNode.fileName + ".xml");
+			writeStringToPath(xml.toXMLString(), _outputFilePath + "/" + _fileName + ".xml");
 		}
 
-		private static function doExportTexturePNG(_allTextureDic:Dictionary, _textureRectDic:Dictionary, _configFileNode:ConfigMetaNodeFile):void
+		private static function doExportTexturePNG(_allTextureDic:Dictionary,
+												   _textureRectDic:Dictionary,
+												   _outputFilePath:String,
+												   _fileName:String):void
 		{
 			var textureAtlasRect:Rectangle=TextureUtil.packTextures(0, 2, _textureRectDic);
 			var textureAtlasBitmapData:BitmapData=new BitmapData(textureAtlasRect.width, textureAtlasRect.height, true, 0);
@@ -92,7 +103,7 @@ package app.utils
 
 				textureAtlasBitmapData.copyPixels(currentBitmapData, shareRect, sharePoint);
 			}
-			writeImgToPath(textureAtlasBitmapData, _configFileNode.outputFilePath + "/" + _configFileNode.fileName + ".png");
+			writeImgToPath(textureAtlasBitmapData, _outputFilePath + "/" + _fileName + ".png");
 		}
 
 

@@ -1,7 +1,7 @@
 package app.debug
 {
 	import com.junkbyte.console.Cc;
-	
+
 	import flash.display.Stage;
 
 	public final class APPLog
@@ -27,7 +27,7 @@ package app.debug
 			Cc.startOnStage(_stage);
 		}
 
-		
+
 		public function APPLog()
 		{
 		}
